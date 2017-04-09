@@ -17,15 +17,21 @@ void* my_malloc(int n)
 	list tmp;
 	tmp.size = n;
 	list *tmp_node = (list*)memory;
+	int freemem = tmp_node->size;
 	if (n <= tmp_node->size && n>0)
 	{
 		if (tmp_node->next != NULL)
+		{
 			tmp_node = tmp_node->next;
+		}
 		{
 			while (tmp_node)
 			{
+				if(tmp_node->size<0)
+				freemem += tmp_node->size;
 				if (n == (-1)*(tmp_node->size))
 				{
+					
 					tmp_node->size = n;
 					tmp_node = (list*)memory;
 					tmp_node->size -= n;
@@ -35,7 +41,7 @@ void* my_malloc(int n)
 				else tmp_node = tmp_node->next;
 			}
 		}
-		if (flag == true)
+		if (flag == true && freemem>=n)
 		{
 			tmp_node = (list*)memory;
 			if (tmp_node->next == NULL)
