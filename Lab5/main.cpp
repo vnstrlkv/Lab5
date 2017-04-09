@@ -5,82 +5,101 @@ struct list
 {
 	int size;
 	list *next;
-}first_list;
+};
+const int m = 1000;
+char memory[m];
 
 
 
-void* my_malloc(int size ,char *memory)
+void* my_malloc(int n)
 {
-	int m = 200;
-	list temp;
-	if (first_list.next == NULL)
+	int *addres;
+	list tmp;
+	tmp.size = n;
+	list *tmp_node = (list*)memory;
+	if (tmp_node->next == NULL)
 	{
-	
-		temp.size = sizeof(list);
-		temp.next = NULL;
-		*((list*)(memory+ first_list.size)) = temp;
-		first_list.next = (list*)(memory + first_list.size);
-		first_list.size -= temp.size;
+		tmp.next = NULL;
+		*((list*)(memory + m - sizeof(list) - n)) = tmp;
+		tmp_node->next = (list*)(memory + m  - n-sizeof(list));
+		addres = (int*)(memory + m - n);
+		tmp_node->size -= n + sizeof(list);
 	}
 	else
 	{
-		temp.size = sizeof(list);
-		temp.next = (first_list.next+sizeof(list));
-		*((list*)(memory + first_list.size)) = temp;
-		first_list.next = (list*)(memory + first_list.size);
-		first_list.size -= temp.size;
+		tmp.next = tmp_node->next;
+		*((list*)(memory + tmp_node->size  - n)) = tmp;
+		tmp_node->next = (list*)(memory + tmp_node->size  - n);
+		addres = (int*)(memory + tmp_node->size+sizeof(list)-n);
+		tmp_node->size -= n+sizeof(list);	
 	}
 
-	return first_list.next;
+	return addres;
 }
 
-void my_free()
+int my_free(int n)
 {
-
-}
-
-void print_next(list* a)
-{
-	while (a->next != NULL)
+	int flag=0;
+	list *tmp=(list*)memory;
+	if (n > 0)
 	{
-		print_next(a->next);
-		printf("%d", a->size);
+		for (int i = 0; i < n; i++)
+		{
+			tmp = tmp->next;
+		}
+
+		if (tmp->size > 0)
+		{
+			tmp->size *= -1;
+			flag = 0;
+		}
 	}
+	return flag;
+}
+void menu()
+{
+
+}
+
+
+void print_size(list *tmp)
+{
+	if (tmp->size < 0)
+		printf("NOTfree: %d", tmp->size);
+	else printf("free: %d", tmp->size);
+	printf("\n");
+}
+void print_list()
+{
+	list* tmp = ((list*)memory)->next;
+	while (tmp->next != NULL)
+	{
+		print_size(tmp);
+		tmp = tmp->next;
+	}
+	print_size(tmp);
+
 }
 
 void main()
 {
-	int m = 200;
-	char *memory = (char*)malloc(m);
+	list node;
+	char *p;
 	for (int i = 0; i < m; i++)
-	{
-		memory[i] ='0';
-	}
-	first_list.size = m-sizeof(list);
-	*((list*)memory) = first_list;
-	for (int i = 0; i < m; i++)
-	{
-		printf("%c ", memory[i]);
-	}
-		printf("\n");
-	printf("%d", first_list.size);
-	printf("\n");
-
-	for (int i = 0; i < 5; i++)
-	{
-		my_malloc(6, memory);
-		printf("\n ");
-		for (int i = 0; i < m; i++)
-		{
-			printf("%c ", memory[i]);
-		}
-		printf("\n");
-		printf("%d", first_list.size);
-		printf("\n");
-	}
-	printf("\n");
-	print_next(first_list.next);
-
-
-
+		memory[i]='1';
+	node.size = m - sizeof(list);
+	node.next = NULL;
+	*((list*)memory) = node;
+	my_malloc(2);
+	my_malloc(3);
+	my_malloc(4);
+	p=(char*)my_malloc(16);
+	p[0] = '5';
+	p[1] = '5';
+	p[2] = '5';
+	p[3] = '5';
+	my_free(1);
+	my_free(3);
+	print_list();
 }
+
