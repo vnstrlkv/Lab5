@@ -36,6 +36,7 @@ void* my_malloc(int n)
 					tmp_node = (list*)memory;
 					tmp_node->size -= n;
 					flag = false;
+					addres = (int*)tmp_node->next + sizeof(list) / sizeof(int);
 					break;
 				}
 				else tmp_node = tmp_node->next;
@@ -66,23 +67,11 @@ void* my_malloc(int n)
 	return addres;
 }
 
-void* my_free(int n)
+void* my_free(void *addres)
 {
-	int i;
-	int *addres=NULL;
-	list *tmp=(list*)memory;
+	list *tmp = (list*)addres-1;
 	list *tmp_node = (list*)memory;
-	if (tmp_node->next != NULL && n>0)
-	{		
-		for (i = 0; i < n; i++)
-		{
-			tmp = tmp->next;
-			if (tmp== NULL)
-				break;
-		}
-		if (i == n)
-		{
-			if (tmp_node->next == tmp)
+		if (tmp_node->next == tmp)
 			{
 				tmp_node->next = tmp->next;
 				addres = (int*)tmp+sizeof(list)/sizeof(int);
@@ -97,8 +86,7 @@ void* my_free(int n)
 				addres = (int*)tmp+sizeof(list) / sizeof(int);
 				tmp_node->size -= tmp->size;			
 			}
-		}
-	}
+
 	return addres;
 }
 
@@ -152,11 +140,27 @@ void menu()
 	}
 	case '2':
 	{
-		int number, *addres;
+		int number, *addres=NULL, i;
+
 		printf("Enter the number of the area you want to free: ");
 		scanf("%d", &number);
 		printf("\n");
-		addres=(int*)my_free(number);
+		list *tmp = (list*)memory;
+		if (number > 0 && tmp->next != NULL)
+		{
+			for (i = 0; i < number; i++)
+			{
+				tmp = tmp->next;
+				if (tmp == NULL)
+					break;
+			}
+			if (i == number)
+			{
+				 addres = (int*)tmp + sizeof(list) / sizeof(int);
+				addres= (int*)my_free(addres);
+			}
+		}
+
 		if (addres != NULL)
 			printf("Free memory by addres: %p\n", addres);
 		else
@@ -180,10 +184,6 @@ void menu()
 }
 void main()
 {
-	for (int i = 0; i < m; i++)
-	 memory[i]='0';
-
-
 	list node;
 	char *p;
 	node.size = m - 2*sizeof(list);
